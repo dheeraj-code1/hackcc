@@ -159,7 +159,7 @@ def create_group():
         return jsonify({'status': 'error', 'message': f'An error occurred: {str(e)}'}), 500
 
 @app.route("/groups", methods=["GET"])
-@login_required
+# @login_required
 def get_all_groups():
     try:
         user_id = session.get('user_id')
