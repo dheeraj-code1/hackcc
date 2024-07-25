@@ -3,7 +3,7 @@ certifi==2024.7.4
 charset-normalizer==3.3.2
 click==8.1.7
 dnspython==2.6.1
-Flask
+Flask>=3.0.0  # Specify a version compatible with Werkzeug
 Flask-SQLAlchemy==3.1.1
 Flask-WTF==1.2.1
 greenlet==3.0.3
@@ -19,6 +19,5 @@ requests-toolbelt==1.0.0
 SQLAlchemy==2.0.31
 typing_extensions==4.12.2
 urllib3==2.2.2
-Werkzeug==2.0.3
+Werkzeug>=3.0.0  # Use a version that is compatible with Flask 3.x
 WTForms==3.1.2
-Werkzeug
