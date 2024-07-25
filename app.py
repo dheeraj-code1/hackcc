@@ -1,16 +1,17 @@
 import os
+import time
+import logging
 from flask import Flask, request, jsonify, session
 from functools import wraps
 from dotenv import load_dotenv
 from pymongo.mongo_client import MongoClient
+from pymongo.errors import AutoReconnect, ConfigurationError
 from urllib.parse import quote_plus
 from werkzeug.security import generate_password_hash, check_password_hash
 from pydantic import BaseModel, Field, ValidationError
 from datetime import datetime
-from typing import Optional
 from bson import ObjectId
 from typing import List
-
 
 # Load environment variables from .env file
 load_dotenv()
@@ -20,6 +21,10 @@ app = Flask(__name__)
 # Set secret key for the Flask app 
 app.secret_key = os.getenv('SECRET_KEY')
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 # URL encode the username and password for MongoDB
 username = quote_plus(os.getenv('DB_USERNAME'))
 password = quote_plus(os.getenv('DB_PASSWORD'))
@@ -27,25 +32,30 @@ password = quote_plus(os.getenv('DB_PASSWORD'))
 # Construct the MongoDB URI with encoded username and password
 uri = f"mongodb+srv://{username}:{password}@cluster0.xjdjd5a.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 
-# Create a MongoDB client
+# Create a MongoDB client with retry logic
 def get_mongo_client(uri):
     max_retries = 5
     for attempt in range(max_retries):
         try:
             client = MongoClient(uri, maxPoolSize=50, minPoolSize=10)
+            # Test the connection
+            client.admin.command('ping')
             return client
-        except AutoReconnect:
+        except (AutoReconnect, ConfigurationError) as e:
             if attempt < max_retries - 1:
-                time.sleep(2)  # Wait before retrying
+                logger.warning(f"Attempt {attempt + 1} failed with error: {e}. Retrying in 2 seconds...")
+                time.sleep(2)
             else:
+                logger.error("Max retries reached. Could not connect to MongoDB.")
                 raise
 
 # Usage
-client = get_mongo_client(uri)
-db = client.flask_db
-
-# Access the MongoDB database
-# db = client.flask_db
+try:
+    client = get_mongo_client(uri)
+    db = client.flask_db
+    logger.info("Connected to MongoDB successfully.")
+except Exception as e:
+    logger.error(f"Error connecting to MongoDB: {e}")
 
 # Define Pydantic models for validation
 class User(BaseModel):
