@@ -28,10 +28,24 @@ password = quote_plus(os.getenv('DB_PASSWORD'))
 uri = f"mongodb+srv://{username}:{password}@cluster0.xjdjd5a.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 
 # Create a MongoDB client
-client = MongoClient(uri, maxPoolSize=50, minPoolSize=10)
+def get_mongo_client(uri):
+    max_retries = 5
+    for attempt in range(max_retries):
+        try:
+            client = MongoClient(uri, maxPoolSize=50, minPoolSize=10)
+            return client
+        except AutoReconnect:
+            if attempt < max_retries - 1:
+                time.sleep(2)  # Wait before retrying
+            else:
+                raise
+
+# Usage
+client = get_mongo_client(uri)
+db = client.flask_db
 
 # Access the MongoDB database
-db = client.flask_db
+# db = client.flask_db
 
 # Define Pydantic models for validation
 class User(BaseModel):
