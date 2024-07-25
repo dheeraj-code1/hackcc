@@ -48,6 +48,10 @@ class Group(BaseModel):
     files: dict = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
+@app.route("/")
+def home():
+    return jsonify("hi I am something"),200
+
 @app.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
