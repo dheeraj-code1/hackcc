@@ -28,7 +28,7 @@ password = quote_plus(os.getenv('DB_PASSWORD'))
 uri = f"mongodb+srv://{username}:{password}@cluster0.xjdjd5a.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 
 # Create a MongoDB client
-client = MongoClient(uri)
+client = MongoClient(uri, maxPoolSize=50, minPoolSize=10)
 
 # Access the MongoDB database
 db = client.flask_db
