@@ -92,8 +92,8 @@ def register():
     if db.users.find_one({'email': email}):
         return jsonify({'status': 'error', 'message': 'Email already registered'}), 400
 
-    hashed_password = generate_password_hash(password, method='sha256')
-    new_user = User(username=username, name=name, email=email, password=hashed_password)
+    # hashed_password = generate_password_hash(password, method='sha256')
+    new_user = User(username=username, name=name, email=email, password=password)
 
     try:
         user_id = db.users.insert_one(new_user.dict()).inserted_id
@@ -124,7 +124,7 @@ def login():
 
     user = db.users.find_one({'email': email})
 
-    if not user or not check_password_hash(user['password'], password):
+    if not user or user['password']!= password:
         return jsonify({'status': 'error', 'message': 'Invalid email or password'}), 401
 
     # Store user_id in session
