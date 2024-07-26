@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from pymongo.mongo_client import MongoClient
 from pymongo.errors import AutoReconnect, ConfigurationError
 from urllib.parse import quote_plus
-from werkzeug.security import generate_password_hash, check_password_hash
+# from werkzeug.security import generate_password_hash, check_password_hash
 from pydantic import BaseModel, Field, ValidationError
 from datetime import datetime
 from bson import ObjectId
@@ -118,13 +118,14 @@ def login():
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
-
+    print(password,email)
     if not email or not password:
         return jsonify({'status': 'error', 'message': 'Missing email or password'}), 400
 
     user = db.users.find_one({'email': email})
 
     if not user or user['password']!= password:
+        print("****************************************************")
         return jsonify({'status': 'error', 'message': 'Invalid email or password'}), 401
 
     # Store user_id in session
@@ -235,4 +236,4 @@ def add_group():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0",port=8083,debug=True)
